@@ -42,3 +42,4 @@ data/
 .idea/
 wandb/
 checkpoints/*.ckpt
+__pycache__
