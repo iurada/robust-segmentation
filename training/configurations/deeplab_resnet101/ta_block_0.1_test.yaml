@@ -1,0 +1,27 @@
+name: ta_block_0.1_deeplabv3_resnet101_bs8
+mode: test
+data_dir: /work/tatommasi/silvia/leonardo/datasets/
+ckpt: /work/tatommasi/silvia/leonardo/diehardnet/checkpoints/ta_block_0.1_deeplabv3_resnet101_bs8-epoch=349-val_miou=0.4781.ckpt
+dataset: cityscapes
+size: 769
+num_gpus: 2
+
+model: deeplab
+model_clip: false
+nan: True
+
+loss: ce
+grad_clip: null
+epochs: 350
+batch_size: 6
+lr: 0.01
+wd: 1e-4
+scheduler: poly
+optimizer: sgd
+
+error_model: block
+inject_p: 0.1
+inject_epoch: 0
+
+seed: 0
+comment: test

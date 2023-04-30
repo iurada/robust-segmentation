@@ -1,0 +1,32 @@
+name: resnet50_test_no_clipping_X
+mode: train
+ckpt: null
+dataset: ImageNet
+num_gpus: 4
+
+model: resnet50
+model_clip: false
+nan: True
+
+loss: bce
+grad_clip: 2.0
+epochs: 10
+batch_size: 256
+lr: 1e-8
+lr_min: 1e-10
+optimizer: adamw
+
+error_model: random
+inject_p: 0.2
+inject_epoch: 0
+
+wd: 1e-5
+rcc: 0.75
+rand_aug: null
+rand_erasing: 0.0
+mixup_cutmix: false
+jitter: 0.0
+label_smooth: 0.0
+
+seed: 0
+comment: test

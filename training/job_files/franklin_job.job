@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#PBS -j oe
+#PBS -l select=1:ncpus=5:ngpus=1:scratch=170gb
+#PBS -l walltime=11:00:00
+#PBS -N imnet
+#PBS -q gpu
+
+module load anaconda/3.2020.2
+source activate /work/fbarontini/conda_envs/nasreal
+
+mkdir -p "${PBS_SCRATCHDIR}/ImageNet"
+cd "${PBS_SCRATCHDIR}/ImageNet" || exit
+start=$(date +%s)
+tar xf /projects/vandal/nas/datasets/imnet.tar
+end=$(date +%s)
+echo "Time spent copying: $(($end-$start)) s"
+
+# TODO
+cd "$PBS_O_WORKDIR" || exit
+./multi_run.sh --data_dir "${PBS_SCRATCHDIR}" $ARGS

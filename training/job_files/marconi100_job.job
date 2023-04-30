@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+function die()
+{
+	echo $1
+	exit 1
+}
+
+echo "Node: $(hostname)"
+echo "Activating environment..."
+module load profile/deeplrn
+module load anaconda/2020.11
+module load cuda/11.0
+source activate /m100_work/IscrC_Tiny-NAS/env/nasreal
+echo "Environment activated."
+
+echo "Copying data..."
+mkdir -p "${TMPDIR}/data"
+start=$(date +%s)
+tar -xf "${WORK}/data/ImageNet.tar" -C "${TMPDIR}/data/" || die "Errore durante la copia dei dati"
+end=$(date +%s)
+echo "Done. Time spent copying: $(($end-$start)) s"
+
+export WANDB_MODE=offline
+./multi_run.sh --data_dir "${TMPDIR}/data" $@

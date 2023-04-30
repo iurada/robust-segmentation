@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+function die()
+{
+	echo $1
+	exit 1
+}
+
+echo "Node: $(hostname)"
+echo "Activating environment..."
+#source "${HOME}/LUCA/activate"
+eval "$(/dgx/home/userexternal/lrobbian/.local/miniconda3/bin/conda shell.bash hook)"
+conda activate NasRealM100
+module load data/imagenet/ilsvrc2012
+echo "Environment activated."
+
+echo "Preparing data..."
+start=$(date +%s)
+mkdir -p "${TMPDIR}/data/ImageNet"
+rsync -ah "${HOME}/data/" "${TMPDIR}/data/ImageNet/"
+ln -s "${DATA_ILSVRC2012_TRAIN}" "${TMPDIR}/data/ImageNet/train"
+ln -s "${DATA_ILSVRC2012_VAL}" "${TMPDIR}/data/ImageNet/val"
+end=$(date +%s)
+echo "Done. Time spent preparing data: $(($end-$start)) s"
+
+export WANDB_MODE=offline
+./multi_run.sh --data_dir "${TMPDIR}/data" $@
