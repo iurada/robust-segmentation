@@ -54,6 +54,7 @@ parser.add_argument('--model', type=str, default='resnet20', help='Network name.
 parser.add_argument('--model_clip', type=bool, default=False, help='Whether to clip layer outputs or not.')
 parser.add_argument('--nan', type=bool, default=False, help='Whether to convert NaNs to 0 or not.')
 parser.add_argument('--freeze', type=bool, default=False, help='Whether to freeze all layer but BN in the first epoch or not.')
+parser.add_argument('--pretrained', type=bool, default=False, help='Whether to start from pretrained weights or not.')
 
 # Optimization
 parser.add_argument('--loss', type=str, default='bce', help='Loss: bce, ce or sce.')
@@ -103,7 +104,7 @@ def main():
     optim_params = {'optimizer': args.optimizer, 'epochs': args.epochs, 'lr': args.lr, 'lr_min': args.lr_min,
                     'wd': args.wd, 'scheduler': args.scheduler}
     net = build_model(args.model, n_classes[args.dataset], optim_params, args.loss, args.error_model, args.inject_p,
-                      args.inject_epoch, args.model_clip, args.nan, args.freeze)
+                      args.inject_epoch, args.model_clip, args.nan, args.freeze, args.pretrained)
 
     # W&B logger
     wandb_logger = WandbLogger(project="NeutronRobustness", name=args.name, entity="pathselector")

@@ -29,7 +29,7 @@ allow_import()
 
 
 def build_model(model=None, n_classes=10, optim_params={}, loss='bce', error_model='random', inject_p=0.1, inject_epoch=0,
-                clip=False, nan=False, freeze=False):
+                clip=False, nan=False, freeze=False, pretrained=False):
 
     if model == 'resnet50':
         model_name = model
@@ -39,19 +39,30 @@ def build_model(model=None, n_classes=10, optim_params={}, loss='bce', error_mod
         model_name = model
         from torchvision.models import efficientnet_v2_s
         model = efficientnet_v2_s()
+
     elif model == 'deeplab':
         model_name = model
 
         from pytorch_scripts.segmentation.deeplabv3_custom.models import deeplabv3_resnet101
-        model = deeplabv3_resnet101(n_classes, pretrained=False)
+        model = deeplabv3_resnet101(n_classes, pretrained=pretrained)
         
         net = Injector(model, error_model, inject_p, inject_epoch, clip, nan)
         return SegmentationModelWrapper(net, n_classes, optim_params, loss, freeze)
+    
     elif model == 'deeplab_relumax':
         model_name = model
 
         from pytorch_scripts.segmentation.deeplabv3_custom.deeplab_relumax import deeplabv3_resnet101
-        model = deeplabv3_resnet101(n_classes, pretrained=True)
+        model = deeplabv3_resnet101(n_classes, pretrained=pretrained)
+        
+        net = Injector(model, error_model, inject_p, inject_epoch, clip, nan)
+        return SegmentationModelWrapper(net, n_classes, optim_params, loss, freeze)
+    
+    elif model == 'deeplab_mobilenet':
+        model_name = model
+
+        from pytorch_scripts.segmentation.mobilenet.models import deeplabv3_mobilenet_v3_large
+        model = deeplabv3_mobilenet_v3_large(n_classes, pretrained=pretrained)
         
         net = Injector(model, error_model, inject_p, inject_epoch, clip, nan)
         return SegmentationModelWrapper(net, n_classes, optim_params, loss, freeze)
