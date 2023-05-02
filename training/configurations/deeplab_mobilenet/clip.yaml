@@ -1,4 +1,4 @@
-name: baseline_mobilenet_pt
+name: clip_mobilenet_pt
 mode: train
 data_dir: /work/tatommasi/silvia/leonardo/datasets/
 ckpt: null
@@ -8,7 +8,7 @@ num_gpus: 1
 
 model: deeplab_mobilenet
 pretrained: True
-model_clip: false
+model_clip: True
 nan: True
 
 loss: ce
