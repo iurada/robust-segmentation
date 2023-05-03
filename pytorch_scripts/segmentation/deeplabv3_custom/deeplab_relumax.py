@@ -1,9 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pytorch_scripts.segmentation.deeplabv3_custom.resnet_relumax import resnet101
+
 from torchvision.models.segmentation import DeepLabV3_ResNet101_Weights
-from pytorch_scripts.segmentation.deeplabv3_custom.relumax import ReLUMax
+
+#from torchvision.models import resnet101
+try:
+    from pytorch_scripts.segmentation.deeplabv3_custom.activations import RobustActivation
+    from pytorch_scripts.segmentation.deeplabv3_custom.resnet_relumax import resnet101
+except ModuleNotFoundError:
+    from activations import RobustActivation
+    from resnet_relumax import resnet101
 
 from typing import Dict, List
 from torch import Tensor
@@ -75,7 +82,7 @@ class DeepLabHead(nn.Sequential):
             ASPP(in_channels, [12, 24, 36]),
             nn.Conv2d(256, 256, 3, padding=1, bias=False),
             nn.BatchNorm2d(256),
-            ReLUMax(), #nn.ReLU(), #!
+            RobustActivation(nn.ReLU()), #!
             nn.Conv2d(256, num_classes, 1),
         )
 
@@ -84,7 +91,7 @@ class ASPPConv(nn.Sequential):
         modules = [
             nn.Conv2d(in_channels, out_channels, 3, padding=dilation, dilation=dilation, bias=False),
             nn.BatchNorm2d(out_channels),
-            ReLUMax(), #nn.ReLU(), #!
+            RobustActivation(nn.ReLU()), #!
         ]
         super().__init__(*modules)
 
@@ -94,7 +101,7 @@ class ASPPPooling(nn.Sequential):
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(in_channels, out_channels, 1, bias=False),
             nn.BatchNorm2d(out_channels),
-            ReLUMax(), #nn.ReLU(), #!
+            RobustActivation(nn.ReLU()), #!
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -108,7 +115,7 @@ class ASPP(nn.Module):
         super().__init__()
         modules = []
         modules.append(
-            nn.Sequential(nn.Conv2d(in_channels, out_channels, 1, bias=False), nn.BatchNorm2d(out_channels), ReLUMax()) #nn.ReLU(),) #!
+            nn.Sequential(nn.Conv2d(in_channels, out_channels, 1, bias=False), nn.BatchNorm2d(out_channels), RobustActivation(nn.ReLU())) #!
         )
 
         rates = tuple(atrous_rates)
@@ -122,7 +129,7 @@ class ASPP(nn.Module):
         self.project = nn.Sequential(
             nn.Conv2d(len(self.convs) * out_channels, out_channels, 1, bias=False),
             nn.BatchNorm2d(out_channels),
-            ReLUMax(), #nn.ReLU(), #!
+            RobustActivation(nn.ReLU()), #!
             nn.Dropout(0.5),
         )
 
@@ -167,3 +174,17 @@ def deeplabv3_resnet101(num_classes=19, pretrained=True):
         model.load_state_dict(DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1.get_state_dict(progress=True), strict=False)
 
     return model
+
+if __name__ == '__main__':
+    model = deeplabv3_resnet101()
+    mod1 = model.modules()
+    mod2 = model.modules()
+
+    for mod1 in model.modules():
+        c = 0
+        for mod2 in model.modules():
+            if mod1 is mod2:
+                c += 1
+        
+        if isinstance(mod1, RobustActivation) and c != 1:
+            print(mod1)

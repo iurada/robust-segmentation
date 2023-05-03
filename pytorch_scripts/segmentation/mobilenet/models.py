@@ -9,8 +9,10 @@ from typing import Dict, List
 from torch import Tensor
 from collections import OrderedDict
 
-from pytorch_scripts.segmentation.mobilenet.mobilenet_custom import mobilenet_v3_large
-#from mobilenet_custom import mobilenet_v3_large
+try:
+    from pytorch_scripts.segmentation.mobilenet.mobilenet_custom import mobilenet_v3_large
+except ModuleNotFoundError:
+    from mobilenet_custom import mobilenet_v3_large
 
 class IntermediateLayerGetter(nn.ModuleDict):
     """
@@ -181,6 +183,9 @@ def deeplabv3_mobilenet_v3_large(num_classes=19, pretrained=True):
     return model
 
 if __name__ == '__main__':
+    def count_parameters(model):
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
     model = deeplabv3_mobilenet_v3_large(pretrained=True)
 
-    print(model)
+    print(count_parameters(model))

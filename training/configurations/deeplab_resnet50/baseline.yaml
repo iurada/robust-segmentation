@@ -1,19 +1,20 @@
-name: pt_relumax_only_deeplabv3_resnet101_bs8
+name: baseline_deeplabv3_resnet50_pt
 mode: train
 data_dir: /data/datasets/
 ckpt: null
 dataset: cityscapes
-size: 256
+size: 769
 num_gpus: 2
 
-model: deeplab_relumax
-model_clip: False
+model: deeplab
+pretrained: True
+model_clip: false
 nan: True
 
 loss: ce
 grad_clip: null
 epochs: 100
-batch_size: 2
+batch_size: 6
 lr: 0.01
 wd: 1e-4
 scheduler: poly

@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.models import resnet101
-from torchvision.models.segmentation import DeepLabV3_ResNet101_Weights
+from torchvision.models import resnet101, resnet50
+from torchvision.models.segmentation import DeepLabV3_ResNet101_Weights, DeepLabV3_ResNet50_Weights
 
 from typing import Dict, List
 from torch import Tensor
@@ -166,3 +166,26 @@ def deeplabv3_resnet101(num_classes=19, pretrained=True):
         model.load_state_dict(DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1.get_state_dict(progress=True), strict=False)
 
     return model
+
+def deeplabv3_resnet50(num_classes=19, pretrained=True):
+    if pretrained: num_classes = 21
+    
+    return_layers = {"layer4": "out"}
+    backbone = resnet50(replace_stride_with_dilation=[False, True, True])
+    backbone = IntermediateLayerGetter(backbone, return_layers=return_layers)
+    classifier = DeepLabHead(2048, num_classes)
+    model = DeepLabV3(backbone, classifier)
+
+    if pretrained:
+        model.load_state_dict(DeepLabV3_ResNet50_Weights.COCO_WITH_VOC_LABELS_V1.get_state_dict(progress=True), strict=False)
+
+    return model
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+if __name__ == '__main__':
+    model = deeplabv3_resnet50()
+    print(count_parameters(model))
+    model = deeplabv3_resnet101()
+    print(count_parameters(model))
