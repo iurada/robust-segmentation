@@ -1,0 +1,28 @@
+name: u_pt_baseline
+mode: train
+data_dir: /data/datasets/
+ckpt: null
+dataset: cityscapes
+size: 513
+num_gpus: 1
+
+model: deeplab
+pretrained: True
+model_clip: false
+nan: True
+
+loss: ce
+grad_clip: null
+epochs: 49
+batch_size: 2
+lr: 0.01
+wd: 1e-4
+scheduler: poly
+optimizer: sgd
+
+error_model: block
+inject_p: 0.0
+inject_epoch: 0
+
+seed: 0
+comment: test

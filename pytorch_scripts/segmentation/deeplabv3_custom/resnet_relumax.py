@@ -47,6 +47,7 @@ class Bottleneck(nn.Module):
         base_width: int = 64,
         dilation: int = 1,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
+        activation: str = 'max'
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -61,9 +62,9 @@ class Bottleneck(nn.Module):
         self.bn3 = norm_layer(planes * self.expansion)
 
         #self.relu = nn.ReLU(inplace=True)
-        self.relumax1 = RobustActivation(nn.ReLU(inplace=True)) #!
-        self.relumax2 = RobustActivation(nn.ReLU(inplace=True)) #!
-        self.relumax3 = RobustActivation(nn.ReLU(inplace=True)) #!
+        self.relumax1 = RobustActivation(nn.ReLU(inplace=True), activation) #!
+        self.relumax2 = RobustActivation(nn.ReLU(inplace=True), activation) #!
+        self.relumax3 = RobustActivation(nn.ReLU(inplace=True), activation) #!
         
         self.downsample = downsample
         self.stride = stride
@@ -104,6 +105,7 @@ class ResNet(nn.Module):
         width_per_group: int = 64,
         replace_stride_with_dilation: Optional[List[bool]] = None,
         norm_layer: Optional[Callable[..., nn.Module]] = None,
+        activation: str = 'max'
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -125,12 +127,12 @@ class ResNet(nn.Module):
         self.base_width = width_per_group
         self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = norm_layer(self.inplanes)
-        self.relu = RobustActivation(nn.ReLU(inplace=True)) #!
+        self.relu = RobustActivation(nn.ReLU(inplace=True), activation) #!
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
+        self.layer1 = self._make_layer(block, 64, layers[0], activation=activation)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0], activation=activation)
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1], activation=activation)
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2], activation=activation)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -156,6 +158,7 @@ class ResNet(nn.Module):
         blocks: int,
         stride: int = 1,
         dilate: bool = False,
+        activation: str = 'max'
     ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
@@ -172,7 +175,7 @@ class ResNet(nn.Module):
         layers = []
         layers.append(
             block(
-                self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation, norm_layer
+                self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation, norm_layer, activation
             )
         )
         self.inplanes = planes * block.expansion
@@ -185,6 +188,7 @@ class ResNet(nn.Module):
                     base_width=self.base_width,
                     dilation=self.dilation,
                     norm_layer=norm_layer,
+                    activation=activation
                 )
             )
 

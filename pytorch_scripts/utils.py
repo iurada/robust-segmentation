@@ -29,7 +29,7 @@ allow_import()
 
 
 def build_model(model=None, n_classes=10, optim_params={}, loss='bce', error_model='random', inject_p=0.1, inject_epoch=0,
-                clip=False, nan=False, freeze=False, pretrained=False):
+                clip=False, nan=False, freeze=False, pretrained=False, activation='max'):
 
     if model == 'resnet50':
         model_name = model
@@ -53,7 +53,7 @@ def build_model(model=None, n_classes=10, optim_params={}, loss='bce', error_mod
         model_name = model
 
         from pytorch_scripts.segmentation.deeplabv3_custom.deeplab_relumax import deeplabv3_resnet101
-        model = deeplabv3_resnet101(n_classes, pretrained=pretrained)
+        model = deeplabv3_resnet101(n_classes, pretrained=pretrained, activation=activation)
         
         net = Injector(model, error_model, inject_p, inject_epoch, clip, nan)
         return SegmentationModelWrapper(net, n_classes, optim_params, loss, freeze)
