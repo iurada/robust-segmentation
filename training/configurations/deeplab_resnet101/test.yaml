@@ -7,7 +7,7 @@ size: 224
 num_gpus: 1
 
 model: deeplab_relumax
-activation: max
+activation: mean_std
 pretrained: True
 model_clip: false
 nan: True

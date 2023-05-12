@@ -48,16 +48,16 @@ class RobustActivation(nn.Module):
     
         if self.training:
             if self.s is None:
-                self.s = torch.sum(x.detach(), dim=0)
-                self.q = torch.sum(x.detach().pow(2), dim=0)
+                self.s = torch.sum(x.detach())
+                self.q = torch.sum(x.detach().pow(2))
                 self.N = x.size(0)
             else:
-                self.s += torch.sum(x.detach(), dim=0)
-                self.q += torch.sum(x.detach().pow(2), dim=0)
+                self.s += torch.sum(x.detach())
+                self.q += torch.sum(x.detach().pow(2))
                 self.N += x.size(0)
         
         elif self.s is not None and self.q is not None and self.N is not None:
-            clip_value = (self.s + self.p * torch.sqrt(self.N * self.q - self.s.pow(2))) / self.N
+            clip_value = (self.s + torch.sqrt(self.N * self.q - self.s.pow(2))) / self.N
             x = torch.clip(x, max=clip_value)
         
         return x
